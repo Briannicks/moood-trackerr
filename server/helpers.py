@@ -24,3 +24,15 @@ def current_user():
     if user_id is None:
         return None
     return db.session.get(User, user_id)
+
+
+def login_required(func):
+    """Block the request with 401 unless a user is logged in."""
+
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        if current_user() is None:
+            return {"errors": ["You must be logged in."]}, 401
+        return func(*args, **kwargs)
+
+    return wrapper
