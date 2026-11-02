@@ -36,3 +36,13 @@ def login_required(func):
         return func(*args, **kwargs)
 
     return wrapper
+
+def find_owned(model, record_id):
+    """Find a record by id only if it belongs to the logged-in user.
+
+    Returning None for other users' records (rather than 403) avoids
+    revealing that the record exists.
+    """
+    return model.query.filter_by(
+        id=record_id, user_id=session.get("user_id")
+    ).first()
