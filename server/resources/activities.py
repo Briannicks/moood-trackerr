@@ -70,4 +70,32 @@ class ActivityById(Resource):
         db.session.delete(activity)
         db.session.commit()
         return {}, 204
+        class MoodActivityLink(Resource):
+    """Attach an activity to a mood (POST) or detach it (DELETE)."""
+    method_decorators = [login_required]
+
+    def _find_both(self, mood_id, activity_id):
+        mood = find_owned(Mood, mood_id)
+        activity = find_owned(Activity, activity_id)
+        if not mood or not activity:
+            return None, None, ({"errors": ["Mood or activity not found."]}, 404)
+        return mood, activity, None
+
+    def post(self, mood_id, activity_id):
+        mood, activity, error = self._find_both(mood_id, activity_id)
+        if error:
+            return error
+        if activity not in mood.activities:
+            mood.activities.append(activity)
+            db.session.commit()
+        return mood_schema.dump(mood), 200
+
+    def delete(self, mood_id, activity_id):
+        mood, activity, error = self._find_both(mood_id, activity_id)
+        if error:
+            return error
+        if activity in mood.activities:
+            mood.activities.remove(activity)
+            db.session.commit()
+        return mood_schema.dump(mood), 200
 
