@@ -51,3 +51,23 @@ class ActivityById(Resource):
         activity = find_owned(Activity, id)
         if not activity:
             return {"errors": ["Activity not found."]}, 404
+               data = request.get_json() or {}
+        if "name" in data:
+            if isinstance(data["name"], str) and name_taken(data["name"], exclude_id=id):
+                return {"errors": ["You already have an activity with that name."]}, 422
+            try:
+                activity.name = data["name"]
+                db.session.commit()
+            except ValueError as error:
+                db.session.rollback()
+                return {"errors": [str(error)]}, 422
+        return activity_schema.dump(activity), 200
+
+    def delete(self, id):
+        activity = find_owned(Activity, id)
+        if not activity:
+            return {"errors": ["Activity not found."]}, 404
+        db.session.delete(activity)
+        db.session.commit()
+        return {}, 204
+
