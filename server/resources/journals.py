@@ -49,3 +49,21 @@ class JournalById(Resource):
         journal = find_owned(Journal, id)
         if not journal:
             return {"errors": ["Journal entry not found."]}, 404
+ data = request.get_json() or {}
+        try:
+            for field in EDITABLE_FIELDS:
+                if field in data:
+                    setattr(journal, field, data[field])
+            db.session.commit()
+        except ValueError as error:
+            db.session.rollback()
+            return {"errors": [str(error)]}, 422
+        return journal_schema.dump(journal), 200
+
+    def delete(self, id):
+        journal = find_owned(Journal, id)
+        if not journal:
+            return {"errors": ["Journal entry not found."]}, 404
+        db.session.delete(journal)
+        db.session.commit()
+        return {}, 204
