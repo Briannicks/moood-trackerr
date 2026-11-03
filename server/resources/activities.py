@@ -17,3 +17,37 @@ def name_taken(name, exclude_id=None):
     if exclude_id is not None:
         query = query.filter(Activity.id != exclude_id)
     return query.first() is not None
+    class Activities(Resource):
+    method_decorators = [login_required]
+
+    def get(self):
+        query = Activity.query.filter_by(user_id=session["user_id"]).order_by(Activity.name)
+        return paginate(query, activities_schema), 200
+
+    def post(self):
+        data = request.get_json() or {}
+        if isinstance(data.get("name"), str) and name_taken(data["name"]):
+            return {"errors": ["You already have an activity with that name."]}, 422
+        try:
+            activity = Activity(name=data.get("name"), user_id=session["user_id"])
+            db.session.add(activity)
+            db.session.commit()
+        except ValueError as error:
+            db.session.rollback()
+            return {"errors": [str(error)]}, 422
+        return activity_schema.dump(activity), 201
+
+
+class ActivityById(Resource):
+    method_decorators = [login_required]
+
+    def get(self, id):
+        activity = find_owned(Activity, id)
+        if not activity:
+            return {"errors": ["Activity not found."]}, 404
+        return activity_schema.dump(activity), 200
+
+    def patch(self, id):
+        activity = find_owned(Activity, id)
+        if not activity:
+            return {"errors": ["Activity not found."]}, 404
