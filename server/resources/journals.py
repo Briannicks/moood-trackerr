@@ -20,7 +20,4 @@ class Journals(Resource):
             Journal.created_at.desc(), Journal.id.desc()
         )
         return paginate(query, journals_schema), 200
-
-    def post(self):
-        data = request.get_json() or {}
-        try:
+        
