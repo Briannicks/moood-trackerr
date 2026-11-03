@@ -20,4 +20,32 @@ class Journals(Resource):
             Journal.created_at.desc(), Journal.id.desc()
         )
         return paginate(query, journals_schema), 200
-        
+        def post(self):
+        data = request.get_json() or {}
+        try:
+            journal = Journal(
+                title=data.get("title"),
+                content=data.get("content"),
+                user_id=session["user_id"],
+            )
+            db.session.add(journal)
+            db.session.commit()
+        except ValueError as error:
+            db.session.rollback()
+            return {"errors": [str(error)]}, 422
+        return journal_schema.dump(journal), 201
+
+
+class JournalById(Resource):
+    method_decorators = [login_required]
+
+    def get(self, id):
+        journal = find_owned(Journal, id)
+        if not journal:
+            return {"errors": ["Journal entry not found."]}, 404
+        return journal_schema.dump(journal), 200
+
+    def patch(self, id):
+        journal = find_owned(Journal, id)
+        if not journal:
+            return {"errors": ["Journal entry not found."]}, 404
