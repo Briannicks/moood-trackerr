@@ -20,7 +20,8 @@ class Journals(Resource):
             Journal.created_at.desc(), Journal.id.desc()
         )
         return paginate(query, journals_schema), 200
-        def post(self):
+
+    def post(self):
         data = request.get_json() or {}
         try:
             journal = Journal(
@@ -49,7 +50,8 @@ class JournalById(Resource):
         journal = find_owned(Journal, id)
         if not journal:
             return {"errors": ["Journal entry not found."]}, 404
- data = request.get_json() or {}
+
+        data = request.get_json() or {}
         try:
             for field in EDITABLE_FIELDS:
                 if field in data:

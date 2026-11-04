@@ -6,6 +6,17 @@ class UserSchema(Schema):
     username = fields.Str()
 
 
+class MoodSchema(Schema):
+    id = fields.Int(dump_only=True)
+    mood = fields.Str()
+    intensity = fields.Int()
+    note = fields.Str(allow_none=True)
+    created_at = fields.DateTime()
+    updated_at = fields.DateTime()
+    user_id = fields.Int()
+    activities = fields.List(fields.Nested(lambda: ActivitySchema(only=("id", "name"))))
+
+
 class ActivitySchema(Schema):
     id = fields.Int(dump_only=True)
     name = fields.Str()
@@ -19,15 +30,3 @@ class JournalSchema(Schema):
     created_at = fields.DateTime()
     updated_at = fields.DateTime()
     user_id = fields.Int()
-
-    class MoodSchema(Schema):
-    id = fields.Int(dump_only=True)
-    mood = fields.Str()
-    intensity = fields.Int()
-    note = fields.Str(allow_none=True)
-    created_at = fields.DateTime()
-    updated_at = fields.DateTime()
-    user_id = fields.Int()
-    activities = fields.List(
-        fields.Nested(lambda: ActivitySchema(only=("id", "name")))
-    )

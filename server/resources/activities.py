@@ -17,7 +17,9 @@ def name_taken(name, exclude_id=None):
     if exclude_id is not None:
         query = query.filter(Activity.id != exclude_id)
     return query.first() is not None
-    class Activities(Resource):
+
+
+class Activities(Resource):
     method_decorators = [login_required]
 
     def get(self):
@@ -51,7 +53,8 @@ class ActivityById(Resource):
         activity = find_owned(Activity, id)
         if not activity:
             return {"errors": ["Activity not found."]}, 404
-               data = request.get_json() or {}
+
+        data = request.get_json() or {}
         if "name" in data:
             if isinstance(data["name"], str) and name_taken(data["name"], exclude_id=id):
                 return {"errors": ["You already have an activity with that name."]}, 422
@@ -70,7 +73,9 @@ class ActivityById(Resource):
         db.session.delete(activity)
         db.session.commit()
         return {}, 204
-        class MoodActivityLink(Resource):
+
+
+class MoodActivityLink(Resource):
     """Attach an activity to a mood (POST) or detach it (DELETE)."""
     method_decorators = [login_required]
 
@@ -98,4 +103,3 @@ class ActivityById(Resource):
             mood.activities.remove(activity)
             db.session.commit()
         return mood_schema.dump(mood), 200
-
