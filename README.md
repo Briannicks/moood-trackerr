@@ -1,6 +1,6 @@
 # Running the app
 
-Start the API on port 5555 (the port the frontend proxy expects):
+Start the API on port 5555 :
 
 bash
 cd server
@@ -67,16 +67,8 @@ All errors are returned as {"errors": ["message"]}. Every endpoint except signup
 | PATCH | /activities/<id> | Rename an activity. |
 | DELETE | /activities/<id> | Delete an activity (it is also removed from any moods). Returns 204. |
 
-### Paginated response format
-
-json
-{
-  "items": [],
-  "page": 1,
-  "per_page": 10,
-  "total": 15,
-  "pages": 2
-}
 
 
-per_page is capped at 50.
+
+
+
